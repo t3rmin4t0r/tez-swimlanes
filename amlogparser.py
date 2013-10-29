@@ -76,7 +76,8 @@ class DAG(object):
 		for v in self.vertexes:
 			for t in v.tasks:
 				for a in t.attempts:
-					yield a
+					if(a.dag == self.name):
+						yield a
 	def __repr__(self):
 		return "%s (%d+%d)" % (self.name, self.start, self.duration)
 

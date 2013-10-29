@@ -71,14 +71,18 @@ class SVGHelper(object):
 		return self.lines.getvalue()
 
 def main(argv):
-	(opts, args) = getopt(argv, "o:t:")
+	(opts, args) = getopt(argv, "o:t:f:")
 	out = sys.stdout
 	ticks = 20 # precision of 1/tick
+	fraction = 0.95
 	for k,v in opts:
 		if(k == "-o"):
 			out = open(v, "w")
 		if(k == "-t"):
 			ticks = int(v)
+		if(k == "-f"):
+			if(int(v) < 100):
+				fraction = int(v)/100.0
 	log = AMLog(args[0]).structure()
 	lanes = [c.name for c in sorted(log.containers.values(), key=lambda a: a.start)]
 	marginTop = 64
@@ -122,6 +126,11 @@ def main(argv):
 			y2 = y1 + laneSize - 2
 			svg.rect(x1, y1, x2, y2, title=c.name, style="fill: %s; stroke: #ccc;" % colour)
 			svg.link((x1+x2)/2, y2-12, c.vertex, link=c.kvs["completedLogs"], style="text-anchor: middle; font-size: 9px;")
+		finishes = sorted([c.finish for c in dag.attempts()])
+		if(len(finishes) > 10):
+			percentX = finishes[int(len(finishes)*fraction)]
+			svg.line(marginRight+xdomain(percentX), marginTop, marginRight+xdomain(percentX), y+marginTop, style="stroke: red")
+			svg.text(marginRight+xdomain(percentX), y+marginTop+12, "%d%% (%0.1fs)" % (int(fraction*100), (percentX - dag.start)/1000.0), style="font-size:12px; text-anchor: middle")
 	prefix = lambda a: (a.find(".") == -1 and a) or (a[:a.find(".")])
 	for c in log.containers.values():
 		y1 = marginTop+(containerMap[c.name]*laneSize)
