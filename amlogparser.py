@@ -7,9 +7,6 @@ try:
 	from urllib.request import urlopen
 except:
 	from urllib2 import urlopen as urlopen
-	
-import simplejson as json
-
 
 class AMRawEvent(object):
 	def __init__(self, ts, dag, event, args):
@@ -64,6 +61,7 @@ class Container(object):
 		self.kvs = csv_kv(raw.args)
 		self.name = self.kvs["containerId"]
 		self.start = int(self.kvs["launchTime"])
+		self.node =""
 	def __repr__(self):
 		return "[%s start=%d]" % (self.name, self.start)
 
