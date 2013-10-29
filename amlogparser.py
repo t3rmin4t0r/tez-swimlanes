@@ -3,6 +3,11 @@ from collections import defaultdict
 from itertools import groupby
 from bz2 import BZ2File
 from gzip import GzipFile as GZFile
+try:
+	from urllib.request import urlopen
+except:
+	from urllib2 import urlopen as urlopen
+	
 import simplejson as json
 
 
@@ -139,6 +144,8 @@ def open_file(f):
 		return GZFile(f)
 	elif(f.endswith(".bz2")):
 		return BZ2File(f)
+	elif(f.startswith("http://")):
+		return urlopen(f)
 	return open(f)
 
 class AMLog(object):	
