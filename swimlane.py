@@ -85,7 +85,7 @@ def main(argv):
 				fraction = int(v)/100.0
 	log = AMLog(args[0]).structure()
 	lanes = [c.name for c in sorted(log.containers.values(), key=lambda a: a.start)]
-	marginTop = 64
+	marginTop = 128
 	marginRight = 100;
 	laneSize = 24
 	y = len(lanes)*laneSize
@@ -94,6 +94,7 @@ def main(argv):
 	x = max([xdomain(a[4]) for a in items])
 	svg = SVGHelper(x+2*marginRight, y+2*marginTop)
 	a = marginTop
+	svg.text(x/2, 32, log.name, style="font-size: 32px; text-anchor: middle")	
 	containerMap = dict(zip(list(lanes), xrange(4096)))
 	# draw a grid
 	for l in lanes:
