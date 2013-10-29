@@ -15,7 +15,7 @@ if "url" not in form:
 <body>
 <form method="POST">
 AM LOG URL: <input type="textbox" name="url" value="" /><br/><br/>
-ticks: <input type="textbox" name="ticks" value="100" /><br/>
+ticks: <input type="textbox" name="ticks" value="50" /><br/>
 deadline: <input type="textbox" name="deadline" value="95%" /><br/>
 <input type="submit"/><br/>
 </form>
@@ -38,7 +38,7 @@ Error! provided URL needs to start with http:// and end with syslog/?start=0
 	""" 
 	sys.exit(0)
 	
-ticks = 25
+ticks = 50
 deadline = 95
 if "ticks" in form:
 	ticks = int(form["ticks"].value)
