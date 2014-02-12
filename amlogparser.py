@@ -48,8 +48,8 @@ class AppMaster(object):
 		self.kvs = csv_kv(raw.args)
 		self.name = self.kvs["appAttemptId"]
 		self.zero = int(self.kvs["startTime"])
-		self.ready = int(self.kvs["initTime"])
-		self.start = int(self.kvs["appSubmitTime"])
+		#self.ready = int(self.kvs["initTime"])
+		#self.start = int(self.kvs["appSubmitTime"])
 		self.containers = None
 		self.dags = None
 	def __repr__(self):
@@ -150,7 +150,7 @@ class AMLog(object):
 	def init(self):
 		ID=r'[^\]]*'
 		TS=r'[0-9:\-, ]*'
-		MAIN_RE=r'^(?P<ts>%(ts)s) INFO [AsyncDispatcher event handler] org.apache.tez.dag.history.HistoryEventHandler: [HISTORY][DAG:(?P<dag>%(id)s)][Event:(?P<event>%(id)s)]: (?P<args>.*)'
+		MAIN_RE=r'^(?P<ts>%(ts)s) INFO [(?P<thread>%(id)s)] org.apache.tez.dag.history.HistoryEventHandler: [HISTORY][DAG:(?P<dag>%(id)s)][Event:(?P<event>%(id)s)]: (?P<args>.*)'
 		MAIN_RE = MAIN_RE.replace('[','\[').replace(']','\]')
 		MAIN_RE = MAIN_RE % {'ts' : TS, 'id' : ID}
 		self.MAIN_RE = re.compile(MAIN_RE)
