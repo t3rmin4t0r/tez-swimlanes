@@ -125,7 +125,10 @@ def main(argv):
 			x1 = marginRight+xdomain(c.start)
 			x2 = marginRight+xdomain(c.finish)
 			y2 = y1 + laneSize - 2
-			svg.rect(x1, y1, x2, y2, title=c.name, style="fill: %s; stroke: #ccc;" % colour)
+			locality = (c.kvs.has_key("DATA_LOCAL_TASKS") * 1) + (c.kvs.has_key("RACK_LOCAL_TASKS")*2)
+			svg.rect(x1, y1, x2, y2, title=c.name, style="fill: %s; stroke: #ccc;" % (colour))
+			if locality > 1: # rack-local (no-locality isn't counted)
+				svg.rect(x1, y2-4, x2, y2, style="fill: #f00; fill-opacity: 0.5;")
 			svg.link((x1+x2)/2, y2-12, c.vertex, link=c.kvs["completedLogs"], style="text-anchor: middle; font-size: 9px;")
 		finishes = sorted([c.finish for c in dag.attempts()])
 		if(len(finishes) > 10):
