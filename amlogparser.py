@@ -24,7 +24,7 @@ def kv_add(d, k, v):
 	if(d.has_key(k)):
 		oldv = d[k]
 		if(type(oldv) is list):
-			oldv.add(v)
+			oldv.append(v)
 		else:
 			oldv = [oldv, v]
 		d[k] = oldv
@@ -37,7 +37,7 @@ def csv_kv(args):
 	for kv in pairs:
 		if(kv.find("=") == -1):
 			kv_add(kvs, kv, None)
-		else:
+		elif(kv.find("=") == kv.rfind("=")):
 			(k,v) = kv.split("=")
 			kv_add(kvs, k, v)
 	return kvs
