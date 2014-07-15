@@ -140,7 +140,10 @@ def main(argv):
 		y1 = marginTop+(containerMap[c.name]*laneSize)
 		x1 = marginRight+xdomain(c.start)
 		svg.line(x1, y1, x1, y1 + laneSize, style="stroke: green")
-		svg.text(marginRight+x+8, y1 + laneSize, prefix(c.node))
+		if c.stop > c.start:
+			x2 = marginRight+xdomain(c.stop)
+			svg.line(x2, y1, x2, y1 + laneSize, style="stroke: red")
+			svg.rect(x1, y1, x2, y1 + laneSize, style="fill: #ccc; opacity: 0.3")
 	out.write(svg.flush())
 	out.close()
 

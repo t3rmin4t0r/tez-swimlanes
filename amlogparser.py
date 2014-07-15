@@ -61,6 +61,7 @@ class Container(object):
 		self.kvs = csv_kv(raw.args)
 		self.name = self.kvs["containerId"]
 		self.start = int(self.kvs["launchTime"])
+		self.stop = -1 
 		self.node =""
 	def __repr__(self):
 		return "[%s start=%d]" % (self.name, self.start)
@@ -184,7 +185,15 @@ class AMLog(object):
 		return first([AppMaster(ev) for ev in self.events if ev.event == "AM_STARTED"])
 	
 	def containers(self):
-		return [Container(ev) for ev in self.events if ev.event == "CONTAINER_LAUNCHED"]
+		containers = [Container(ev) for ev in self.events if ev.event == "CONTAINER_LAUNCHED"]
+		containermap = dict([(c.name, c) for c in containers])
+		for ev in self.events:
+			if ev.event == "CONTAINER_STOPPED":
+				kvs = csv_kv(ev.args)
+				if containermap.has_key(kvs["containerId"]):
+					containermap[kvs["containerId"]].stop = int(kvs["stoppedTime"])
+		return containers
+				
 	
 	def dags(self):
 		dags = [DAG(ev) for ev in self.events if ev.event == "DAG_FINISHED"]
