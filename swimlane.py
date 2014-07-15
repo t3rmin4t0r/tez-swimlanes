@@ -110,6 +110,17 @@ def main(argv):
 	svg.line(marginRight+x, marginTop, marginRight+x, y+marginTop)
 	
 	colourman = ColourManager()
+	for c in log.containers.values():
+		y1 = marginTop+(containerMap[c.name]*laneSize)
+		x1 = marginRight+xdomain(c.start)
+		svg.line(x1, y1, x1, y1 + laneSize, style="stroke: green")
+		if c.stop > c.start:
+			x2 = marginRight+xdomain(c.stop)
+			svg.line(x2, y1, x2, y1 + laneSize, style="stroke: red")
+			svg.rect(x1, y1, x2, y1 + laneSize, style="fill: #ccc; opacity: 0.3")
+		elif c.stop == -1:
+			x2 = marginRight+x 
+			svg.rect(x1, y1, x2, y1 + laneSize, style="fill: #ccc; opacity: 0.3")
 	for dag in log.dags:
 		x1 = marginRight+xdomain(dag.start)
 		svg.line(x1, marginTop-24, x1, marginTop+y, "stroke: black;", stroke_dasharray="8,4")
@@ -136,14 +147,6 @@ def main(argv):
 			svg.line(marginRight+xdomain(percentX), marginTop, marginRight+xdomain(percentX), y+marginTop, style="stroke: red")
 			svg.text(marginRight+xdomain(percentX), y+marginTop+12, "%d%% (%0.1fs)" % (int(fraction*100), (percentX - dag.start)/1000.0), style="font-size:12px; text-anchor: middle")
 	prefix = lambda a: (a.find(".") == -1 and a) or (a[:a.find(".")])
-	for c in log.containers.values():
-		y1 = marginTop+(containerMap[c.name]*laneSize)
-		x1 = marginRight+xdomain(c.start)
-		svg.line(x1, y1, x1, y1 + laneSize, style="stroke: green")
-		if c.stop > c.start:
-			x2 = marginRight+xdomain(c.stop)
-			svg.line(x2, y1, x2, y1 + laneSize, style="stroke: red")
-			svg.rect(x1, y1, x2, y1 + laneSize, style="fill: #ccc; opacity: 0.3")
 	out.write(svg.flush())
 	out.close()
 
