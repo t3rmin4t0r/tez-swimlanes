@@ -141,6 +141,7 @@ class Vertex(object):
 	def structure(self, tasks):
 		self.tasks = [t for t in tasks if t.vertex == self.name]
 		self.t0 = min([t.start for t in tasks] or [v.start])
+		self.tn = max([t.finish for t in tasks] or [v.finish])
 	def __repr__(self):
 		return "%s (%d+%d)" % (self.name, self.start, self.duration)
 
