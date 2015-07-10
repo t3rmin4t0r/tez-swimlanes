@@ -1,5 +1,23 @@
-import os,sys,re,math,os.path
-from collections import defaultdict
+#
+# Licensed to the Apache Software Foundation (ASF) under one
+# or more contributor license agreements.  See the NOTICE file
+# distributed with this work for additional information
+# regarding copyright ownership.  The ASF licenses this file
+# to you under the Apache License, Version 2.0 (the
+# "License"); you may not use this file except in compliance
+# with the License.  You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing,
+# software distributed under the License is distributed on an
+# "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied.  See the License for the
+# specific language governing permissions and limitations
+# under the License.
+#
+
+import sys,re
 from itertools import groupby
 from bz2 import BZ2File
 from gzip import GzipFile as GZFile
@@ -72,6 +90,7 @@ class Container(object):
 		self.name = self.kvs["containerId"]
 		self.start = int(self.kvs["launchTime"])
 		self.stop = -1 
+		self.status = 0
 		self.node =""
 	def __repr__(self):
 		return "[%s start=%d]" % (self.name, self.start)
@@ -143,16 +162,22 @@ class Attempt(object):
 	def __init__(self, pair):
 		start = first(filter(lambda a: a.event == "TASK_ATTEMPT_STARTED", pair))
 		finish = first(filter(lambda a: a.event == "TASK_ATTEMPT_FINISHED", pair))
+		if start is None or finish is None:
+			print [start, finish];
 		self.raw = finish
-		self.dag = finish.dag
 		self.kvs = csv_kv(start.args)
-		self.kvs.update(csv_kv(finish.args))
+		if finish is not None:
+			self.dag = finish.dag
+			self.kvs.update(csv_kv(finish.args))
+			self.finish = (int)(self.kvs["finishTime"])
+			self.duration = (int)(self.kvs["timeTaken"])
 		self.name = self.kvs["taskAttemptId"]
 		self.task = self.name[:self.name.rfind("_")].replace("attempt","task")
+		(_, _, amid, dagid, vertexid, taskid, attemptid) = self.name.split("_")
+		self.tasknum = int(taskid)
+		self.attemptnum = int(attemptid)
 		self.vertex = self.kvs["vertexName"]
 		self.start = (int)(self.kvs["startTime"])
-		self.finish = (int)(self.kvs["finishTime"])
-		self.duration = (int)(self.kvs["timeTaken"])
 		self.container = self.kvs["containerId"]
 		self.node = self.kvs["nodeId"]
 	def __repr__(self):
@@ -172,7 +197,7 @@ class AMLog(object):
 	def init(self):
 		ID=r'[^\]]*'
 		TS=r'[0-9:\-, ]*'
-		MAIN_RE=r'^(?P<ts>%(ts)s) INFO [(?P<thread>%(id)s)] org.apache.tez.dag.history.HistoryEventHandler: [HISTORY][DAG:(?P<dag>%(id)s)][Event:(?P<event>%(id)s)]: (?P<args>.*)'
+		MAIN_RE=r'^(?P<ts>%(ts)s) INFO [(?P<thread>%(id)s)] (org.apache.tez.dag.)?history.HistoryEventHandler: [HISTORY][DAG:(?P<dag>%(id)s)][Event:(?P<event>%(id)s)]: (?P<args>.*)'
 		MAIN_RE = MAIN_RE.replace('[','\[').replace(']','\]')
 		MAIN_RE = MAIN_RE % {'ts' : TS, 'id' : ID}
 		self.MAIN_RE = re.compile(MAIN_RE)
@@ -219,6 +244,7 @@ class AMLog(object):
 				kvs = csv_kv(ev.args)
 				if containermap.has_key(kvs["containerId"]):
 					containermap[kvs["containerId"]].stop = int(kvs["stoppedTime"])
+					containermap[kvs["containerId"]].status = int(kvs["exitStatus"])
 		return containers
 				
 	
@@ -253,14 +279,11 @@ class AMLog(object):
 			return AMRawEvent(ts, dag, event, args)
 
 def main(argv):
-	f = argv[0]
 	tree = AMLog(argv[0]).structure()
 	# AM -> dag -> vertex -> task -> attempt
 	# AM -> container
-	containers = set(tree.containers.keys())
-	timeto = lambda a: (a - tree.zero)
 	for d in tree.dags:
-		for a in d.attempts():			
+		for a in d.attempts():
 			print [a.vertex, a.name, a.container, a.start, a.finish]
 
 if __name__ == "__main__":
