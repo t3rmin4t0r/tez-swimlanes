@@ -51,8 +51,6 @@ def main(argv):
 	log = AMLog(args[0]).structure()
 	dags = log.dags
 	vertexes = sorted(list(chain(*[d.vertexes for d in dags])),key = lambda v : v.t0)
-	for v in vertexes:
-		print v.start, v.t0, v.t0 <= v.start
 	marginTop = 128
 	marginRight = 128;
 	laneSize = 64
