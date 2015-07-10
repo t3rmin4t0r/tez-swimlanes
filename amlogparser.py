@@ -131,6 +131,7 @@ class Vertex(object):
 		self.dag = raw.dag
 		self.kvs = csv_kv(raw.args)
 		self.name = self.kvs["vertexName"]
+		self.vid = self.kvs["vertexId"]
 		self.initZero = (int)(self.kvs["initRequestedTime"])
 		self.init = (int)(self.kvs["initedTime"])
 		self.startZero = (int)(self.kvs["startRequestedTime"])
@@ -139,6 +140,7 @@ class Vertex(object):
 		self.duration = (int)(self.kvs["timeTaken"])
 	def structure(self, tasks):
 		self.tasks = [t for t in tasks if t.vertex == self.name]
+		self.t0 = min([t.start for t in tasks] or [v.start])
 	def __repr__(self):
 		return "%s (%d+%d)" % (self.name, self.start, self.duration)
 

@@ -73,6 +73,8 @@ class SVGHelper(object):
 		""")
 	def line(self, x1, y1, x2, y2, style="stroke: #000", **kwargs):
 		self.write("""<line x1="%d" y1="%d" x2="%d" y2="%d"  style="%s" %s />""" % (x1, y1, x2, y2, style, attrs(kwargs)))
+	def polyline(self, points, style="stroke: #000", **kwargs):
+		self.write("""<polyline points="%s"  style="%s" %s />""" % (",".join(["%d,%d" % (x,y) for (x,y) in points]), style, attrs(kwargs)))
 	def rect(self, left, top, right, bottom, style="", title="", link=None):
 		w = (right-left)
 		h = (bottom-top)
@@ -88,7 +90,7 @@ class SVGHelper(object):
 		self.text(x, y, text, style)
 		self.write("</a>")
 	def write(self, s):
-		self.lines.write(s)
+		self.lines.write(s + "\n")
 	def flush(self):
 		self.write("</svg>")
 		if(self.parent):
